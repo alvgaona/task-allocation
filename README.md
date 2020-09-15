@@ -1,6 +1,6 @@
 # Multi-Robot Task Allocation (MRTA)
 
-This repository contains simulations and scripts related to my PhD thesis at [Faculty of Engineering,
+This repository contains simulations and scripts related to my PhD thesis at [School of Engineering,
 University of Buenos Aires][FIUBA] in Robotics and Control Theory.
 
 ## References
