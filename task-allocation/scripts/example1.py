@@ -48,14 +48,11 @@ if __name__ == '__main__':
     # Global Task Specification
     global_task_specification = np.asarray([[0.5], [0.5]])
     
-    # CVXPY parameters
-    C = 1  # Scaling constant
-    L = 5  # Scaling constant
-    
-    # Prioritization parameters
+    # Parameters
+    C = 1
+    L = 5
     kappa = 1 / 10
     delta_max = 10
-    Pr = np.asarray([[-kappa, 1, 0], [0, -kappa]])  # Prioritization Matrix
     
     # Control variables
     u = cp.Variable((N, 2))
