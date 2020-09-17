@@ -50,7 +50,7 @@ if __name__ == '__main__':
     
     # CVXPY parameters
     C = 1  # Scaling constant
-    l = 5  # Scaling constant
+    L = 5  # Scaling constant
     
     # Prioritization parameters
     kappa = 1 / 10
@@ -66,15 +66,15 @@ if __name__ == '__main__':
     
     # Objective
     objective = C * cp.norm2(global_task_specification - 1 / N * P @ alpha) ** 2 + \
-                l * (cp.norm2(u[0, :]) ** 2 + cp.quad_form(delta[0, :], S[0]) +
-                     cp.norm2(u[1, :]) ** 2 + cp.quad_form(delta[1, :], S[1]))
+        L * (cp.norm2(u[0, :]) ** 2 + cp.quad_form(delta[0, :], S[0]) +
+             cp.norm2(u[1, :]) ** 2 + cp.quad_form(delta[1, :], S[1]))
     
     # Constraints
     constraints = [
-        np.ones((1, M)) @ alpha[0:2] == 1.0,      # (14d)
-        np.ones((1, M)) @ alpha[2:5] == 1.0,      # (14d)
-        alpha <= 1,                               # (14f)
-        alpha >= 0                                # (14f)
+        np.ones((1, M)) @ alpha[0:2] == 1.0,  # (14d)
+        np.ones((1, M)) @ alpha[2:5] == 1.0,  # (14d)
+        alpha <= 1,  # (14f)
+        alpha >= 0  # (14f)
     ]
     
     obj = cp.Minimize(objective)
