@@ -1,5 +1,26 @@
 #!/usr/local/bin/python3
 
+r""" Example 1 from "Adaptive Task Allocation for Heterogeneous Multi-Robot Teams with
+    Evolving and Unknown Robot Capabilities.", Yousef Emam et al.
+    
+    It consists of a fleet of two heterogeneous robots asked to execute 2 tasks effectively.
+    Each robot has its own specialization matrix defined.
+    
+    Specialization matrices
+    
+    .. math::
+       S_1 = diag([1, 0])
+       S_2 = diag([1, 1])
+    
+    Another parameter defined is the Global Task Specification defining the fraction of robots
+    desired to execute each task.
+    
+    Global Task Specification
+    
+    .. math::
+       \pi^* = [\frac{1}{2} \frac{1}{2}]
+"""
+
 import cvxpy as cp
 import numpy as np
 
@@ -8,27 +29,6 @@ from numpy.linalg import pinv
 np.set_printoptions(suppress=True)
 
 if __name__ == '__main__':
-    r""" Example 1 from "Adaptive Task Allocation for Heterogeneous Multi-Robot Teams with
-    Evolving and Unknown Robot Capabilities.", Yousef Emam et al.
-
-    It consists of a fleet of two heterogeneous robots asked to execute 2 tasks effectively.
-    Each robot has its own specialization matrix defined.
-
-    Specialization matrices
-
-    .. math::
-       S_1 = diag([1, 0])
-       S_2 = diag([1, 1])
-
-    Another parameter defined is the Global Task Specification defining the fraction of robots
-    desired to execute each task.
-
-    Global Task Specification
-
-    .. math::
-       \pi^* = [\frac{1}{2} \frac{1}{2}]
-    """
-
     M = 2  # Number of Tasks
     N = 2  # Number of Robots
 
