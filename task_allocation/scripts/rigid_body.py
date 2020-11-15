@@ -1,9 +1,5 @@
 #!/usr/local/bin/python3
 
-r""" TODO: Complete description
-"""
-
-import scipy as scp
 import scipy.signal
 
 import cvxpy as cp
