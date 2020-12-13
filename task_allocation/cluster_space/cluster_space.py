@@ -63,79 +63,77 @@ def plot_robots_trajectory(c, r, p):
     plt.ylabel('Position Y')
     plt.legend(['Cluster Trajectory', 'Robot 1 Trajectory', 'Robot 2 Trajectory'])
     plt.show()
-    
 
-class Main:
-    timesteps = 100  # Number of time steps
-    
-    @staticmethod
-    def run():
-        Izz = 1
-        m = 10
-        bx = 5
-        by = 5
-        btheta = 1
-        
-        goals = np.asarray([[2, 1.6, 1.57], [1, 1.8, 1.57], [0, 1.5, 1.57]])
-        
-        A, B = robot_cluster(m, Izz, bx, by, btheta)
-        state_space = cluster_state_space(m, Izz, bx, by, btheta)
-        
-        r = np.zeros((Main.timesteps, 2 * DOF))
-        rdot = np.zeros((Main.timesteps, 2 * DOF))
-        
-        # Set initial pose of the robots
-        r[0, :] = np.asarray([5, 1, 0, 15, 1, 0])
-        
-        c = np.zeros((Main.timesteps, 2 * DOF))
-        cdot = np.zeros((Main.timesteps, 2 * DOF))
-        
-        # Set initial pose of the cluster
-        c[0, :] = np.asarray([10, 1, 0, 5, 1, 0])
-        
-        x = np.zeros((Main.timesteps, 12))
-        
-        for t in range(Main.timesteps):
-            u, alpha, delta = compute_task_allocation(c[t, 0:3], goals)
-            
-            control = np.concatenate((u.value, [0, 0, 0]))
-            
-            if t <= Main.timesteps - 2:
-                J = compute_jacobian_matrix(r[t, :])
-                delta = np.transpose(np.linalg.inv(J)).dot(A).dot(np.linalg.inv(J))
-                upsilon = np.transpose(np.linalg.inv(J)).dot(B).dot(np.linalg.inv(J))
-                
-                Jinv = compute_inverse_jacobian_matrix(c[t, :])
-                Jdot = compute_dot_jacobian_matrix(r[t, :], rdot[t, :])
-                mu = upsilon.dot(cdot[t, :]) - delta.dot(Jdot).dot(Jinv).dot(cdot[t, :])
-                
-                # FIX: Remove hardcoded value. Keep in mind control is way too big.
-                F = delta.dot(0.1 * control) + mu
-                
-                gamma = np.transpose(J).dot(F)
-                
-                x[t, 0:3] = r[t, 0:3]
-                x[t, 3:6] = rdot[t, 0:3]
-                x[t, 6:9] = r[t, 3:6]
-                x[t, 9:12] = rdot[t, 3:6]
-                
-                sys = cont2discrete(state_space, 1, method='foh')
-                
-                Ad = sys[0]
-                Bd = sys[1]
-                
-                x[t + 1, :] = Ad.dot(x[t, :]) + Bd.dot(gamma)
-                
-                r[t + 1, 0:3] = x[t + 1, 0:3]
-                rdot[t + 1, 0:3] = x[t + 1, 3:6]
-                r[t + 1, 3:6] = x[t + 1, 6:9]
-                rdot[t + 1, 3:6] = x[t + 1, 9:12]
-                
-                c[t + 1, :] = compute_forward_pose(r[t + 1, :])
-        
-        plot_cluster_state(c)
-        plot_robots_trajectory(c, r, goals)
+
+def main():
+    timesteps: int = 100  # Number of time steps
+
+    Izz = 1
+    m = 10
+    bx = 5
+    by = 5
+    btheta = 1
+
+    goals = np.asarray([[2, 1.6, 1.57], [1, 1.8, 1.57], [0, 1.5, 1.57]])
+
+    A, B = robot_cluster(m, Izz, bx, by, btheta)
+    state_space = cluster_state_space(m, Izz, bx, by, btheta)
+
+    r = np.zeros((timesteps, 2 * DOF))
+    rdot = np.zeros((timesteps, 2 * DOF))
+
+    # Set initial pose of the robots
+    r[0, :] = np.asarray([5, 1, 0, 15, 1, 0])
+
+    c = np.zeros((timesteps, 2 * DOF))
+    cdot = np.zeros((timesteps, 2 * DOF))
+
+    # Set initial pose of the cluster
+    c[0, :] = np.asarray([10, 1, 0, 5, 1, 0])
+
+    x = np.zeros((timesteps, 12))
+
+    for t in range(timesteps):
+        u, alpha, delta = compute_task_allocation(c[t, 0:3], goals)
+
+        control = np.concatenate((u.value, [0, 0, 0]))
+
+        if t <= timesteps - 2:
+            J = compute_jacobian_matrix(r[t, :])
+            delta = np.transpose(np.linalg.inv(J)).dot(A).dot(np.linalg.inv(J))
+            upsilon = np.transpose(np.linalg.inv(J)).dot(B).dot(np.linalg.inv(J))
+
+            Jinv = compute_inverse_jacobian_matrix(c[t, :])
+            Jdot = compute_dot_jacobian_matrix(r[t, :], rdot[t, :])
+            mu = upsilon.dot(cdot[t, :]) - delta.dot(Jdot).dot(Jinv).dot(cdot[t, :])
+
+            # FIX: Remove hardcoded value. Keep in mind control is way too big.
+            F = delta.dot(0.1 * control) + mu
+
+            gamma = np.transpose(J).dot(F)
+
+            x[t, 0:3] = r[t, 0:3]
+            x[t, 3:6] = rdot[t, 0:3]
+            x[t, 6:9] = r[t, 3:6]
+            x[t, 9:12] = rdot[t, 3:6]
+
+            sys = cont2discrete(state_space, 1, method='foh')
+
+            Ad = sys[0]
+            Bd = sys[1]
+
+            x[t + 1, :] = Ad.dot(x[t, :]) + Bd.dot(gamma)
+
+            r[t + 1, 0:3] = x[t + 1, 0:3]
+            rdot[t + 1, 0:3] = x[t + 1, 3:6]
+            r[t + 1, 3:6] = x[t + 1, 6:9]
+            rdot[t + 1, 3:6] = x[t + 1, 9:12]
+
+            c[t + 1, :] = compute_forward_pose(r[t + 1, :])
+
+    plot_cluster_state(c)
+    plot_robots_trajectory(c, r, goals)
 
 
 if __name__ == '__main__':
-    Main.run()
+    main()
