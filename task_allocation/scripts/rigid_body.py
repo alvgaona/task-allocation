@@ -10,12 +10,15 @@ from numpy.linalg import pinv
 
 np.set_printoptions(suppress=True)
 
+d = 3  # State vector dimension
+q = 3  # Control vector dimension
 
-def plot_state(x):
+
+def plot_state(x, t):
     plt.figure()
-    plt.plot(x[:, 0], linestyle='dashed')
-    plt.plot(x[:, 1], linestyle='dashed')
-    plt.plot(x[:, 2], linestyle='dashed')
+    plt.plot(t, x[:, 0], linestyle='dashed')
+    plt.plot(t, x[:, 1], linestyle='dashed')
+    plt.plot(t, x[:, 2], linestyle='dashed')
 
     plt.title('Planar Robot Position')
     plt.xlabel('Timestamp')
@@ -62,7 +65,7 @@ def task_allocation(x, p):
     # Parameters
     C = 1
     L = 1
-    DELTA_MAX = 4
+    DELTA_MAX = 10
     KAPPA = 10
 
     u = cp.Variable(q)
@@ -74,15 +77,15 @@ def task_allocation(x, p):
 
     # Constraints
     constraints = [
-        -2 * (x - p[0, :]).T @ u >= cp.sum_squares((x - p[0, :])) - delta[0],
-        -2 * (x - p[1, :]).T @ u >= cp.sum_squares((x - p[1, :])) - delta[1],
-        -2 * (x - p[2, :]).T @ u >= cp.sum_squares((x - p[2, :])) - delta[2],
+        -2 * (x - p[0, :]).T @ u >= cp.log(cp.sum_squares((x - p[0, :]))) - delta[0],
+        -2 * (x - p[1, :]).T @ u >= cp.log(cp.sum_squares((x - p[1, :]))) - delta[1],
+        -2 * (x - p[2, :]).T @ u >= cp.log(cp.sum_squares((x - p[2, :]))) - delta[2],
         cp.norm_inf(delta) <= DELTA_MAX,
         np.ones((1, M)) @ alpha == 1.0,
-        delta[2] <= KAPPA * (delta[1] - DELTA_MAX * (1 - alpha[0])),
-        delta[2] <= KAPPA * (delta[0] - DELTA_MAX * (1 - alpha[1])),
+        delta[2] <= KAPPA * (delta[0] - DELTA_MAX * (1 - alpha[0])),
+        delta[2] <= KAPPA * (delta[1] - DELTA_MAX * (1 - alpha[1])),
         alpha <= 1,
-        alpha >= 0
+        alpha >= 0,
     ]
 
     obj = cp.Minimize(objective)
@@ -93,8 +96,12 @@ def task_allocation(x, p):
     return u, alpha, delta
 
 
-def run(p):
-    T = 100  # Number of time steps
+def main():
+    p = np.asarray([[1, 1, np.pi / 2], [2, 2, np.pi / 4], [0, 2, np.pi / 6]])
+    
+    T = 1000
+    
+    timesteps, dt = np.linspace(0, 100, T, retstep=True)
 
     Izz = 1
     m = 10
@@ -123,14 +130,14 @@ def run(p):
     C = np.eye(6)
     D = np.zeros((6, 3))
 
-    sys = scipy.signal.cont2discrete((A, B, C, D), 1, method='foh')
+    sys = scipy.signal.cont2discrete((A, B, C, D), dt, method='foh')
 
     Ad = sys[0]
     Bd = sys[1]
 
     r = np.zeros((T, 6))
 
-    for it in range(T):
+    for it, _ in enumerate(timesteps):
         x = r[it, 0:3]
 
         u, alpha, delta = task_allocation(x, p)
@@ -138,16 +145,9 @@ def run(p):
         if it <= T - 2:
             r[it + 1, :] = Ad.dot(r[it, :]) + Bd.dot(u.value)
 
-    return r
+    plot_robot_trajectory(r, p)
+    plot_state(r, timesteps)
 
 
 if __name__ == '__main__':
-    d = 3  # State vector dimension
-    q = 3  # Control vector dimension
-
-    goals = np.asarray([[2, 2, np.pi / 2], [1, 2, np.pi / 4], [2, 1, np.pi / 6]])
-
-    x = run(goals)
-
-    plot_robot_trajectory(x, goals)
-    plot_state(x)
+    main()
