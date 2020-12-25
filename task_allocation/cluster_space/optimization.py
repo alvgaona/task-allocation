@@ -30,23 +30,25 @@ def compute_task_allocation(x, p):
     
     objective = C * cp.sum_squares(global_task_specification - cp.reshape(1 / num_robots * P @ alpha, (num_tasks, 1))) + \
                 cp.sum_squares(u) + L * cp.sum_squares(delta)
-        
+    
     # Constraints
     constraints = [
-        -2 * (x - p[0, :]).T @ u >= cp.sum_squares((x - p[0, :])) - delta[0],
-        -2 * (x - p[1, :]).T @ u >= cp.sum_squares((x - p[1, :])) - delta[1],
-        -2 * (x - p[2, :]).T @ u >= cp.sum_squares((x - p[2, :])) - delta[2],
+        -2 * (x - p[0, :]).T @ u >= cp.log(cp.sum_squares((x - p[0, :]))) - delta[0],
+        -2 * (x - p[1, :]).T @ u >= cp.log(cp.sum_squares((x - p[1, :]))) - delta[1],
+        -2 * (x - p[2, :]).T @ u >= cp.log(cp.sum_squares((x - p[2, :]))) - delta[2],
         cp.norm_inf(delta) <= DELTA_MAX,
         np.ones((1, num_tasks)) @ alpha == 1.0,
-        delta[0] <= KAPPA * (delta[2] - DELTA_MAX * (1 - alpha[0])),
-        delta[0] <= KAPPA * (delta[1] - DELTA_MAX * (1 - alpha[1])),
+        delta[1] <= KAPPA * (delta[0] - DELTA_MAX * (1 - alpha[0])),
+        delta[1] <= KAPPA * (delta[2] - DELTA_MAX * (1 - alpha[2])),
         alpha <= 1,
-        alpha >= 0
+        alpha >= 0,
+        u <= 0.2,
+        u >= -0.2
     ]
     
     obj = cp.Minimize(objective)
     prob = cp.Problem(obj, constraints)
     
-    prob.solve(verbose=False)
+    prob.solve(solver='OSQP', verbose=False)
     
     return u, alpha, delta
