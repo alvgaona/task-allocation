@@ -27,7 +27,7 @@ def compute_inverse_pose(c):
     x2 = x_c - d * np.sin(yaw_c)
     
     y1 = y_c + d * np.cos(yaw_c)
-    y2 = y_c + d * np.cos(yaw_c)
+    y2 = y_c - d * np.cos(yaw_c)
     
     yaw1 = yaw_c + phi1
     yaw2 = yaw_c + phi2
@@ -104,12 +104,12 @@ def compute_dot_jacobian_matrix(r, rdot):
     
     Jdot = np.zeros((6, 6))
     
-    Jdot[2, :] = np.asarray([
-        (1 / 2) * (y1 - y2) * ((y1 - y2) * (x1d - x2d) - (x1 - x2) * (y1d - y2d)) / np.power(B, 3 / 2),
-        (1 / 2) * (x1 - x2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)) / np.power(B, 3 / 2),
+    Jdot[2, :] = (1 / 2) * np.power(B, 3 / 2) * np.asarray([
+        (y1 - y2) * ((y1 - y2) * (x1d - x2d) - (x1 - x2) * (y1d - y2d)),
+        (x1 - x2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)),
         0,
-        (1 / 2) * (y1 - y2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)) / np.power(B, 3 / 2),
-        - (1 / 2) * (x1 - x2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)) / np.power(B, 3 / 2),
+        (y1 - y2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)),
+        -(x1 - x2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)),
         0
     ])
     
@@ -169,7 +169,6 @@ def robot_cluster(m, Izz, bx, by, btheta):
 
 
 def cluster_state_space(m, Izz, bx, by, btheta):
-    
     Ai = np.asmatrix([
         [0, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 1, 0],
