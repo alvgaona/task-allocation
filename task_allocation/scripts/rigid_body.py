@@ -66,7 +66,7 @@ def task_allocation(x, p):
     C = 1
     L = 1
     DELTA_MAX = 10
-    KAPPA = 10
+    KAPPA = 1
 
     u = cp.Variable(q)
     alpha = cp.Variable(M)
@@ -82,10 +82,12 @@ def task_allocation(x, p):
         -2 * (x - p[2, :]).T @ u >= cp.log(cp.sum_squares((x - p[2, :]))) - delta[2],
         cp.norm_inf(delta) <= DELTA_MAX,
         np.ones((1, M)) @ alpha == 1.0,
-        delta[2] <= KAPPA * (delta[0] - DELTA_MAX * (1 - alpha[0])),
-        delta[2] <= KAPPA * (delta[1] - DELTA_MAX * (1 - alpha[1])),
+        delta[1] <= KAPPA * (delta[2] - DELTA_MAX * (1 - alpha[2])),
+        delta[1] <= KAPPA * (delta[0] - DELTA_MAX * (1 - alpha[0])),
         alpha <= 1,
         alpha >= 0,
+        u >= -0.2,
+        u <= 0.2
     ]
 
     obj = cp.Minimize(objective)
@@ -97,7 +99,7 @@ def task_allocation(x, p):
 
 
 def main():
-    p = np.asarray([[1, 1, np.pi / 2], [2, 2, np.pi / 4], [0, 2, np.pi / 6]])
+    p = np.asarray([[1, 1, 3 * np.pi / 2], [2, 2, 3 * np.pi / 2], [0, 2, 3 * np.pi / 2]])
     
     T = 1000
     
