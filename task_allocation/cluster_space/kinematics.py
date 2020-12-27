@@ -54,7 +54,7 @@ def compute_jacobian_matrix(robots_pose):
     
     J = np.zeros((6, 6))
     
-    J[0, :] = np.asarray([1 / 2, 1 / 2, 0, 0, 0, 0])
+    J[0, :] = np.asarray([1 / 2, 0, 0, 1 / 2, 0, 0])
     J[1, :] = np.asarray([0, 1 / 2, 0, 0, 1 / 2, 0])
     J[2, :] = (1 / A) * np.asarray([x1 - x2, y1 - y2, 0, -x1 + x2, -y1 + y2, 0])
     J[3, :] = (1 / B) * np.asarray([-y1 + y2, x1 - x2, 0, y1 - y2, -x1 + x2, 0])
@@ -79,9 +79,9 @@ def compute_inverse_jacobian_matrix(cluster_pose):
     
     Jinv[0, :] = np.asarray([1, 0, np.sin(yaw_c), d * np.cos(yaw_c), 0, 0])
     Jinv[1, :] = np.asarray([0, 1, np.cos(yaw_c), -d * np.sin(yaw_c), 0, 0])
-    Jinv[2, :] = np.asarray([1, 0, -np.sin(yaw_c), -d * np.cos(yaw_c), 0, 0])
-    Jinv[3, :] = np.asarray([0, 1, -np.cos(yaw_c), d * np.sin(yaw_c), 0, 0])
-    Jinv[4, :] = np.asarray([0, 0, 0, 1, 1, 0])
+    Jinv[2, :] = np.asarray([0, 0, 0, 1, 1, 0])
+    Jinv[3, :] = np.asarray([1, 0, -np.sin(yaw_c), -d * np.cos(yaw_c), 0, 0])
+    Jinv[4, :] = np.asarray([0, 1, -np.cos(yaw_c), d * np.sin(yaw_c), 0, 0])
     Jinv[5, :] = np.asarray([0, 0, 0, 1, 0, 1])
     
     return Jinv
@@ -104,7 +104,7 @@ def compute_dot_jacobian_matrix(r, rdot):
     
     Jdot = np.zeros((6, 6))
     
-    Jdot[2, :] = (1 / 2) * np.power(B, 3 / 2) * np.asarray([
+    Jdot[2, :] = (1 / (2 * np.power(B, 3 / 2))) * np.asarray([
         (y1 - y2) * ((y1 - y2) * (x1d - x2d) - (x1 - x2) * (y1d - y2d)),
         (x1 - x2) * (-(y1 - y2) * (x1d - x2d) + (x1 - x2) * (y1d - y2d)),
         0,

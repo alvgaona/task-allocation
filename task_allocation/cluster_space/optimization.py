@@ -22,7 +22,7 @@ def compute_task_allocation(x, p):
     C = 1
     L = 1
     DELTA_MAX = 10
-    KAPPA = 10
+    KAPPA = 1
     
     u = cp.Variable(control_dim)
     alpha = cp.Variable(num_tasks)

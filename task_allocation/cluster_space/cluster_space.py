@@ -24,20 +24,24 @@ def main():
     
     logger.info("Used timestep: {} s".format(dt))
     
-    Izz = 41
-    m = 150
-    bx = 100
-    by = 400
-    btheta = 25
+    Izz = 1
+    m = 10
+    bx = 5
+    by = 5
+    btheta = 1
     
     goals = np.asarray(
-        [[10, 10, 1],
-         [15, 10, 1],
-         [10, 15, 1]]
+        [[10, 10, np.pi / 2],
+         [15, 10, np.pi / 2],
+         [10, 15, np.pi / 2]]
     )
     
     A, B = robot_cluster(m, Izz, bx, by, btheta)
     state_space = cluster_state_space(m, Izz, bx, by, btheta)
+    sys = cont2discrete(state_space, dt, method='foh')
+
+    Ad = sys[0]
+    Bd = sys[1]
     
     r = np.zeros((T, 2 * DOF))
     rdot = np.zeros((T, 2 * DOF))
@@ -58,19 +62,19 @@ def main():
     
     for idx, t in enumerate(timesteps):
         optimization_state = np.append([], c[idx, 0:2])
-        optimization_state = np.append(optimization_state, c[idx, 3])
+        optimization_state = np.append(optimization_state, c[idx, 2])
         
         u, alpha, delta = compute_task_allocation(optimization_state, goals)
         
         control[0] = u.value[0]
         control[1] = u.value[1]
-        control[2] = 0
-        control[3] = u.value[2]
+        control[2] = u.value[2]
+        control[3] = 0
         control[4] = 0
         control[5] = 0
         
         slack_variables[idx, :] = delta.value
-        control_input[idx, :] = np.concatenate((control[0:2], [control[3]]))
+        control_input[idx, :] = np.concatenate((control[0:2], [control[2]]))
         
         if idx <= T - 2:
             J = compute_jacobian_matrix(r[idx, :])
@@ -89,11 +93,6 @@ def main():
             x[idx, 3:6] = rdot[idx, 0:3]
             x[idx, 6:9] = r[idx, 3:6]
             x[idx, 9:12] = rdot[idx, 3:6]
-            
-            sys = cont2discrete(state_space, dt, method='foh')
-            
-            Ad = sys[0]
-            Bd = sys[1]
             
             x[idx + 1, :] = Ad.dot(x[idx, :]) + Bd.dot(gamma)
             
