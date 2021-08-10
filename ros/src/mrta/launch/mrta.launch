@@ -1,0 +1,15 @@
+<launch>
+    <param name="ROS_IP" type="str" value="192.168.0.23" />
+    <param name="ROS_TCP_PORT" type="int" value="10000" />
+    <param name="TCP_NODE_NAME" type="str" value="TCPServer" />
+    <param name="TCP_BUFFER_SIZE" type="int" value="1024" />
+    <param name="TCP_CONNECTIONS" type="int" value="10" />
+
+    <param name="UNITY_IP" type="str" value="192.168.0.23" />
+    <param name="UNITY_SERVER_PORT" type="int" value="5005" />
+
+    <group ns="mrta_publisher_and_endpoint">
+       <node pkg="mrta" name="server_endpoint" type="server_endpoint.py"/>
+       <node pkg="mrta" name="orientation_publisher" type="orientation_publisher.py"/>
+    </group>
+</launch>

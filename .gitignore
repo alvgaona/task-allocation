@@ -1,3 +1,8 @@
+# ROS
+devel/
+install/
+build/
+
 # Visual Studio Code
 .vscode/
 
