@@ -295,7 +295,7 @@ function main()
     slack[i, :] = δ
 
     println("t=$tᵢ u₁=$(u[1]) u₂=$(u[2]) u₃=$(u[3])")
-    println("xc=$(c[i, 1]) yc=$(c[i, 2]) θc=$(c[i, 3]) d=$(c[i, 4]) ϕ₁=$(c[i, 5]) ϕ₂: $(c[i,6])")
+    println("xᶜ=$(c[i, 1]) yᶜ=$(c[i, 2]) θᶜ=$(c[i, 3]) d=$(c[i, 4]) ϕ₁=$(c[i, 5]) ϕ₂: $(c[i,6])")
 
     if i <= T - 1
       J = forward_kin_jacobian(r[i, :])
