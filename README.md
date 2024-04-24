@@ -1,8 +1,5 @@
 # Multi-Robot Task Allocation (MRTA)
 
-This repository contains simulations and scripts related to my PhD thesis at [School of Engineering,
-University of Buenos Aires][FIUBA] in Robotics and Control Theory.
-
 ## References
 
 1. [I. Mas and C. A. Kitts, "Dynamic Control of Mobile Multirobot Systems: The Cluster Space Formulation," in IEEE Access, vol. 2, pp. 558-570, 2014, doi: 10.1109/ACCESS.2014.2325742.][The Cluster Space Formulation]
